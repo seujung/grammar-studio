@@ -1,10 +1,11 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { AppRoutes } from '../../App';
 import { AppProvider } from '../../context/AppContext';
-import { DEFAULT_PROGRESS, saveProgress } from '../../lib/storage';
+import { DEFAULT_PROGRESS, DEFAULT_SETTINGS, exportBackupJson, saveProgress } from '../../lib/storage';
+import { toDateKey } from '../../lib/srs';
 
 function renderAt(initialEntries: string[] = ['/']) {
   return render(
@@ -116,5 +117,63 @@ describe('Grammar in Use Studio UI integration', () => {
 
     expect(screen.getByText('정답입니다!')).toBeInTheDocument();
     expect(screen.getByText('3일 뒤 다시 복습하도록 예약했습니다.')).toBeInTheDocument();
+  });
+
+  it('loads progress from a local JSON file on Dashboard and updates UI', async () => {
+    const user = userEvent.setup();
+    renderAt(['/']);
+
+    const todayKey = toDateKey(new Date());
+    const backupText = exportBackupJson(
+      {
+        ...DEFAULT_PROGRESS,
+        studyDates: [todayKey],
+        dailyCompletedUnits: { [todayKey]: [1, 3] },
+        unitProgress: {
+          1: {
+            unitId: 1,
+            attemptedExerciseIds: ['u1-e1'],
+            correctExerciseIds: ['u1-e1'],
+            bestScore: 100,
+            totalExercises: 8,
+            completedAt: new Date().toISOString(),
+            lastStudiedAt: new Date().toISOString(),
+          },
+        },
+      },
+      DEFAULT_SETTINGS,
+    );
+
+    const fileInput = screen.getByLabelText('진도 파일 불러오기');
+    const file = new File([backupText], 'my-progress.json', { type: 'application/json' });
+    Object.defineProperty(file, 'text', {
+      value: () => Promise.resolve(backupText),
+    });
+
+    await user.upload(fileInput, file);
+
+    expect(await screen.findByText('연결된 파일: my-progress.json')).toBeInTheDocument();
+    expect(screen.getByText('2 / 2 단원')).toBeInTheDocument();
+    expect(screen.getByText('1일')).toBeInTheDocument();
+  });
+
+  it('marks unsaved changes after exercise attempt and clears them when saving progress file', async () => {
+    const user = userEvent.setup();
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    Object.defineProperty(URL, 'createObjectURL', { value: vi.fn().mockReturnValue('blob:test'), configurable: true });
+    Object.defineProperty(URL, 'revokeObjectURL', { value: vi.fn(), configurable: true });
+
+    renderAt(['/unit/1']);
+
+    await user.click(screen.getByRole('button', { name: /am tying/i }));
+    await user.click(screen.getByRole('button', { name: '정답 확인' }));
+
+    expect(screen.getByLabelText('저장되지 않은 변경 있음')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: '진도 저장' }));
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+    expect(screen.queryByLabelText('저장되지 않은 변경 있음')).not.toBeInTheDocument();
+
+    clickSpy.mockRestore();
   });
 });

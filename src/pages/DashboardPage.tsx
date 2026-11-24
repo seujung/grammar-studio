@@ -8,6 +8,7 @@ import {
   RotateCw,
   Target,
 } from 'lucide-react';
+import { ProgressFileBar } from '../components/ProgressFileBar';
 import { useApp } from '../context/AppContext';
 import { CATEGORIES, DEEP_UNIT_IDS, SYLLABUS_UNITS, getUnitSummary } from '../data/syllabus';
 
@@ -90,6 +91,8 @@ export function DashboardPage() {
           </div>
         </div>
       </section>
+
+      <ProgressFileBar />
 
       <section className="grid gap-4 md:grid-cols-3">
         <div className="flex flex-col justify-between rounded-2xl border border-stone-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">

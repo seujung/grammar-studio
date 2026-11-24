@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import {
   BookOpen,
   Compass,
+  FileDown,
   LayoutDashboard,
   Moon,
   RotateCw,
@@ -13,7 +14,7 @@ import { useApp } from '../context/AppContext';
 import { BackupModal } from './BackupModal';
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { settings, updateSettings, dueCards } = useApp();
+  const { settings, updateSettings, dueCards, fileSync, saveProgressFile } = useApp();
   const [modalOpen, setModalOpen] = useState(false);
 
   const navItems = [
@@ -79,6 +80,27 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </nav>
 
           <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => void saveProgressFile()}
+              aria-label="진도 저장"
+              title={
+                fileSync.fileName
+                  ? `연결된 파일(${fileSync.fileName})에 진도 저장`
+                  : '진도 파일로 저장'
+              }
+              className="relative inline-flex items-center gap-1 rounded-lg border border-stone-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-blue-400 hover:text-blue-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+            >
+              <FileDown className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">진도 저장</span>
+              {fileSync.hasUnsavedChanges && (
+                <span
+                  aria-label="저장되지 않은 변경 있음"
+                  className="h-2 w-2 rounded-full bg-amber-500"
+                />
+              )}
+            </button>
+
             <button
               type="button"
               onClick={() =>

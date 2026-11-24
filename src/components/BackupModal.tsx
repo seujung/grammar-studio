@@ -3,20 +3,23 @@ import { Download, RotateCcw, Upload, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export function BackupModal({ onClose }: { onClose: () => void }) {
-  const { settings, updateSettings, exportBackup, importBackup, resetAllProgress } = useApp();
+  const {
+    settings,
+    updateSettings,
+    saveProgressFile,
+    loadProgressFileFromText,
+    resetAllProgress,
+  } = useApp();
   const [statusMessage, setStatusMessage] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
 
-  const handleDownload = () => {
-    const json = exportBackup();
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `grammar-in-use-backup-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    setStatusMessage({ type: 'ok', text: '학습 기록 JSON 파일을 내려받았습니다.' });
+  const handleDownload = async () => {
+    const res = await saveProgressFile(true);
+    if (res.ok) {
+      setStatusMessage({ type: 'ok', text: `진도 파일(${res.fileName})을 저장했습니다.` });
+    } else if (!res.cancelled && res.error) {
+      setStatusMessage({ type: 'err', text: res.error });
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,9 +27,9 @@ export function BackupModal({ onClose }: { onClose: () => void }) {
     if (!file) return;
     try {
       const text = await file.text();
-      const result = importBackup(text);
+      const result = loadProgressFileFromText(text, file.name);
       if (result.ok) {
-        setStatusMessage({ type: 'ok', text: '백업 데이터를 복원했습니다.' });
+        setStatusMessage({ type: 'ok', text: `백업 파일(${result.fileName})을 복원했습니다.` });
       } else {
         setStatusMessage({ type: 'err', text: result.error });
       }
