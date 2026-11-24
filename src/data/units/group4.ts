@@ -952,7 +952,7 @@ export const GROUP_4_UNITS: UnitDetail[] = [
         explanationKo: '둘러싸인 내부나 넓은 지역(in a room, in Seoul)은 in, 특정 지점·모이는 장소(at the entrance, at the desk)는 at, 표면·선 위(on the wall, on the floor)는 on을 씁니다.',
         formula: 'in = inside/area  |  at = point/location  |  on = surface/line',
         examples: [
-          { en: 'There is a spare key inside the drawer—wait, it is in the blue jar.', ko: '여분 열쇠가 파란 단지 안에 들어 있습니다.', highlight: 'in the blue jar' },
+          { en: 'There is a spare key in the blue jar on the shelf.', ko: '선반 위 파란 단지 안에 여분 열쇠가 들어 있습니다.', highlight: 'in the blue jar' },
           { en: 'Let’s meet at the main entrance of the science hall.', ko: '과학관 정문 앞에서 만납시다.', highlight: 'at the main entrance' },
           { en: 'They hung a framed world map on the study wall.', ko: '그들은 서재 벽에 액자에 넣은 세계 지도를 걸었습니다.', highlight: 'on the study wall' },
         ],

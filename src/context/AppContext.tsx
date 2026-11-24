@@ -130,12 +130,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (exerciseId: string, isCorrect: boolean): SrsCard | null => {
       const now = new Date();
       const todayKey = toDateKey(now);
-      let updatedCard: SrsCard | null = null;
+      const currentExisting = progress.srsCards[exerciseId];
+      if (!currentExisting) return null;
+      const computedCard = reviewSrsCard(currentExisting, isCorrect, now);
 
       setProgress((prev) => {
         const existing = prev.srsCards[exerciseId];
         if (!existing) return prev;
-        updatedCard = reviewSrsCard(existing, isCorrect, now);
+        const nextCard = reviewSrsCard(existing, isCorrect, now);
         const nextStudyDates = prev.studyDates.includes(todayKey)
           ? prev.studyDates
           : [...prev.studyDates, todayKey];
@@ -144,15 +146,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           ...prev,
           srsCards: {
             ...prev.srsCards,
-            [exerciseId]: updatedCard,
+            [exerciseId]: nextCard,
           },
           studyDates: nextStudyDates,
         };
       });
 
-      return updatedCard;
+      return computedCard;
     },
-    [],
+    [progress.srsCards],
   );
 
   const saveDiagnosticResult = useCallback((result: DiagnosticResult) => {

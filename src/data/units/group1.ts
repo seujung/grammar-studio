@@ -442,8 +442,8 @@ export const GROUP_1_UNITS: UnitDetail[] = [
     ],
     commonMistakes: [
       {
-        wrong: 'I have been to the store—I will be back in ten minutes.',
-        right: 'I have gone to the store—wait, I meant: She has gone to the store.',
+        wrong: 'Where is Mina? — She has been to the store; she will be back soon.',
+        right: 'Where is Mina? — She has gone to the store; she will be back soon.',
         explanationEn: 'If someone is still away at the store, use "has gone to", not "has been to".',
         explanationKo: '가서 아직 돌아오지 않은 상태라면 has been to가 아니라 has gone to를 씁니다.',
       },
@@ -1440,9 +1440,9 @@ export const GROUP_1_UNITS: UnitDetail[] = [
         type: 'fill-blank',
         instructionEn: 'Complete the question about a rule.',
         instructionKo: '규정에 대한 의문문을 완성하십시오.',
-        prompt: '______ cyclists wear a helmet in this park by law?',
-        wordBank: ['Do / have to', 'Must / to', 'Have / must', 'Did / must'],
-        acceptedAnswers: ['do / have to', 'do cyclists have to'],
+        prompt: 'Do cyclists ______ wear a helmet in this park by law?',
+        wordBank: ['have to', 'must', 'has to', 'must to'],
+        acceptedAnswers: ['have to'],
         fullSentence: 'Do cyclists have to wear a helmet in this park by law?',
         explanationEn: 'Questions about rules typically use "Do + subject + have to".',
         explanationKo: '규정을 묻는 일반 의문문은 Do + 주어 + have to 어순을 씁니다.',
