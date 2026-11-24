@@ -3,11 +3,296 @@
 
 @layer base {
   :root {
-    --font-sans: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color-scheme: light;
+
+    --bg-shell: #eae6dc;
+    --bg-canvas: #fcfbf8;
+    --bg-surface: #ffffff;
+    --bg-subtle: #f2efe8;
+    --bg-hover: #e5e0d4;
+
+    --ink-primary: #171614;
+    --ink-secondary: #545047;
+    --ink-muted: #857f74;
+
+    --border-subtle: #e2ddd2;
+    --border-strong: #cac3b4;
+
+    --accent: #1b5741;
+    --accent-hover: #144332;
+    --accent-btn: #1b5741;
+    --accent-btn-hover: #144332;
+    --accent-soft: #e9f3ee;
+    --accent-border: #b9dacb;
+
+    --signal: #c44d27;
+    --signal-soft: #fcf0eb;
+    --signal-border: #ecc5b7;
+
+    --cover-bg: #163b2d;
+    --cover-surface: #1e4b3a;
+    --cover-border: rgba(255, 255, 255, 0.12);
+    --cover-ink: #faf8f3;
+    --cover-ink-muted: #bdd3c8;
+
+    --success: #1b6b46;
+    --success-soft: #e9f5ee;
+    --success-border: #b5dec9;
+
+    --danger: #b8332a;
+    --danger-soft: #fcefee;
+    --danger-border: #ebc3bf;
+
+    --warn: #a35a14;
+    --warn-soft: #fbf3e4;
+    --warn-border: #e8cfa0;
+
+    --font-sans: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     --font-serif: "Newsreader", Georgia, "Times New Roman", serif;
+    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  }
+
+  .dark {
+    color-scheme: dark;
+
+    --bg-shell: #0e0e0d;
+    --bg-canvas: #161514;
+    --bg-surface: #1e1d1b;
+    --bg-subtle: #262522;
+    --bg-hover: #2e2c28;
+
+    --ink-primary: #f2eee7;
+    --ink-secondary: #aba497;
+    --ink-muted: #767066;
+
+    --border-subtle: #2a2825;
+    --border-strong: #3f3c36;
+
+    --accent: #63c19a;
+    --accent-hover: #82d3b0;
+    --accent-btn: #1e6b4f;
+    --accent-btn-hover: #267f5e;
+    --accent-soft: #142820;
+    --accent-border: #254e3e;
+
+    --signal: #ec7f58;
+    --signal-soft: #2e1b15;
+    --signal-border: #593326;
+
+    --cover-bg: #12281f;
+    --cover-surface: #19362a;
+    --cover-border: rgba(99, 193, 154, 0.22);
+    --cover-ink: #f3f1eb;
+    --cover-ink-muted: #98bfb0;
+
+    --success: #5bc493;
+    --success-soft: #13281f;
+    --success-border: #234e3b;
+
+    --danger: #f08076;
+    --danger-soft: #2f1615;
+    --danger-border: #5a2b28;
+
+    --warn: #e6ae54;
+    --warn-soft: #2c2111;
+    --warn-border: #543e1e;
   }
 
   body {
     font-family: var(--font-sans);
+    background-color: var(--bg-shell);
+    color: var(--ink-primary);
+    word-break: keep-all;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.font-editorial {
+  font-family: var(--font-serif);
+  font-optical-sizing: auto;
+}
+
+.font-mono-code {
+  font-family: var(--font-mono);
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+.studio-window {
+  box-shadow:
+    0 1px 2px rgba(23, 22, 20, 0.05),
+    0 10px 28px -8px rgba(23, 22, 20, 0.07);
+}
+
+.dark .studio-window {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+.studio-nav-active {
+  background-color: var(--bg-surface);
+  box-shadow:
+    0 1px 2px rgba(23, 22, 20, 0.08),
+    0 0 0 1px var(--border-subtle);
+}
+
+.dark .studio-nav-active {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 0 0 1px var(--border-strong);
+}
+
+.pressable {
+  transition:
+    transform 160ms var(--ease-out),
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    opacity 150ms ease;
+}
+
+.pressable:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.pressable-subtle {
+  transition:
+    transform 160ms var(--ease-out),
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    opacity 150ms ease;
+}
+
+.pressable-subtle:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+.interactive-surface {
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .interactive-surface:hover:not(:disabled) {
+    background-color: var(--bg-hover);
+  }
+
+  .interactive-border:hover:not(:disabled) {
+    border-color: var(--border-strong);
+  }
+
+  .interactive-accent-border:hover:not(:disabled) {
+    border-color: var(--accent);
+  }
+
+  .interactive-btn-accent:hover:not(:disabled) {
+    background-color: var(--accent-btn-hover);
+  }
+
+  .interactive-btn-ink:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+}
+
+.progress-fill {
+  transform-origin: left center;
+  transition: transform 280ms var(--ease-out);
+  will-change: transform;
+}
+
+.modal-backdrop {
+  opacity: 1;
+  transition: opacity 200ms var(--ease-out);
+}
+
+@starting-style {
+  .modal-backdrop {
+    opacity: 0;
+  }
+}
+
+.modal-panel {
+  transform-origin: center;
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  transition:
+    opacity 220ms var(--ease-out),
+    transform 220ms var(--ease-out);
+}
+
+@starting-style {
+  .modal-panel {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+}
+
+.feedback-enter {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 200ms var(--ease-out),
+    transform 200ms var(--ease-out);
+}
+
+@starting-style {
+  .feedback-enter {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes speaking-pulse-kf {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.speaking-pulse {
+  animation: speaking-pulse-kf 1.2s ease-in-out infinite;
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pressable,
+  .pressable-subtle,
+  .progress-fill,
+  .modal-backdrop,
+  .modal-panel,
+  .feedback-enter {
+    transition: opacity 120ms ease, background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+  }
+
+  .pressable:active:not(:disabled),
+  .pressable-subtle:active:not(:disabled) {
+    transform: none;
+  }
+
+  .speaking-pulse {
+    animation: none;
   }
 }

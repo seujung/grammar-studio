@@ -32,7 +32,7 @@ export function SpeakButton({
   if (!supported) {
     return (
       <span
-        className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-xs text-slate-400"
+        className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-xs text-[var(--ink-muted)]"
         title="이 브라우저는 음성 읽기를 지원하지 않습니다"
       >
         <VolumeX className="h-3.5 w-3.5" />
@@ -63,19 +63,19 @@ export function SpeakButton({
   };
 
   return (
-    <span className="inline-flex items-center gap-1">
+    <span className="inline-flex shrink-0 items-center gap-1">
       <button
         type="button"
         onClick={() => handlePlay(settings.speechRate)}
         aria-label={`발음 듣기: ${text}`}
         title={`발음 듣기 (${settings.accent}, ${settings.speechRate}x)`}
-        className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium transition ${
+        className={`pressable inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium ${
           speaking
-            ? 'border-blue-600 bg-blue-50 text-blue-700 dark:border-blue-400 dark:bg-blue-950/60 dark:text-blue-300'
-            : 'border-stone-200 bg-white text-slate-700 hover:border-blue-400 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-blue-500'
+            ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent)]'
+            : 'interactive-surface interactive-accent-border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--ink-secondary)]'
         }`}
       >
-        <Volume2 className="h-3.5 w-3.5" />
+        <Volume2 className={`h-3.5 w-3.5 ${speaking ? 'speaking-pulse' : ''}`} />
         {!compact && <span>듣기</span>}
       </button>
       {showSlowOption && (
@@ -84,7 +84,7 @@ export function SpeakButton({
           onClick={() => handlePlay(0.75)}
           aria-label={`느리게 듣기: ${text}`}
           title="0.75x 느리게 듣기"
-          className="rounded-md border border-stone-200 bg-white px-1.5 py-1 text-[11px] font-medium text-slate-600 transition hover:border-blue-400 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-blue-500"
+          className="pressable interactive-surface interactive-accent-border tnum rounded-md border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-1.5 py-1 text-[11px] font-medium text-[var(--ink-muted)]"
         >
           0.75x
         </button>

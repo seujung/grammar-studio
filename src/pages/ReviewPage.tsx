@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle2, RotateCw, Sparkles } from 'lucide-react';
+import { CheckCircle2, RotateCw } from 'lucide-react';
 import { ExerciseCard } from '../components/ExerciseRunner';
 import { useApp } from '../context/AppContext';
 import { getExerciseById } from '../data/units';
@@ -34,14 +34,14 @@ export function ReviewPage() {
   if (validQueue.length === 0 || !currentCard || !currentExercise) {
     return (
       <div className="mx-auto max-w-2xl space-y-6">
-        <div className="rounded-2xl border border-stone-200 bg-white p-8 text-center dark:border-slate-800 dark:bg-slate-900">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
-            <CheckCircle2 className="h-6 w-6" />
+        <div className="rounded-xl border border-[var(--border-subtle)] border-t-2 border-t-[var(--accent)] bg-[var(--bg-surface)] p-8 text-center">
+          <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--accent-border)] bg-[var(--accent-soft)] text-[var(--accent)]">
+            <CheckCircle2 className="h-5 w-5" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+          <h1 className="text-2xl font-bold tracking-[-0.02em] text-[var(--ink-primary)]">
             오늘의 복습 완료
           </h1>
-          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+          <p className="mt-2 text-sm leading-relaxed text-[var(--ink-secondary)]">
             {reviewedCount > 0
               ? `이번 세션에서 ${reviewedCount}개 문항을 복습했습니다.`
               : '지금 복습 기한이 지난 문항이 없습니다. 심화 단원에서 새 문제를 풀면 자동으로 복습 카드가 등록됩니다.'}
@@ -49,29 +49,33 @@ export function ReviewPage() {
           <div className="mt-5 flex justify-center gap-3">
             <Link
               to="/curriculum"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-blue-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500"
+              className="pressable interactive-btn-accent inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-btn)] px-5 py-2.5 text-sm font-semibold text-white"
             >
-              <Sparkles className="h-4 w-4" />
               커리큘럼에서 학습하기
             </Link>
           </div>
         </div>
 
         {totalTracked > 0 && (
-          <div className="rounded-2xl border border-stone-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-            <h2 className="text-sm font-bold text-slate-900 dark:text-white">
-              예약된 복습 카드 ({totalTracked}개 관리 중)
-            </h2>
-            <ul className="mt-3 space-y-2 text-xs text-slate-600 dark:text-slate-300">
+          <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
+            <div className="border-b border-[var(--border-subtle)] bg-[var(--bg-subtle)]/70 px-5 py-3">
+              <h2 className="tnum text-sm font-bold text-[var(--ink-primary)]">
+                예약된 복습 카드 ({totalTracked}개 관리 중)
+              </h2>
+            </div>
+            <ul className="divide-y divide-[var(--border-subtle)] text-xs text-[var(--ink-secondary)]">
               {upcomingCards.map((card) => (
                 <li
                   key={card.exerciseId}
-                  className="flex items-center justify-between rounded-lg bg-stone-50 px-3 py-2 dark:bg-slate-800/60"
+                  className="tnum flex items-center justify-between px-5 py-3"
                 >
                   <span>
-                    Unit {card.unitId} · {card.exerciseId} (간격 {card.intervalDays}일)
+                    <span className="font-mono-code font-semibold text-[var(--ink-primary)]">
+                      Unit {card.unitId}
+                    </span>{' '}
+                    · {card.exerciseId} (간격 {card.intervalDays}일)
                   </span>
-                  <span className="font-semibold">
+                  <span className="font-semibold text-[var(--ink-primary)]">
                     {toDateKey(new Date(card.nextReviewAt))} 예정
                   </span>
                 </li>
@@ -85,27 +89,27 @@ export function ReviewPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-5">
-      <div className="flex items-center justify-between rounded-2xl border border-stone-200 bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex items-center gap-2">
-          <RotateCw className="h-5 w-5 text-emerald-700 dark:text-emerald-400" />
+      <div className="flex items-center justify-between rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-5 py-3.5">
+        <div className="flex items-center gap-2.5">
+          <RotateCw className="h-4 w-4 text-[var(--accent)]" />
           <div>
-            <h1 className="text-base font-bold text-slate-900 dark:text-white">
+            <h1 className="text-sm font-bold text-[var(--ink-primary)] sm:text-base">
               오늘의 간격 반복 복습 (SRS)
             </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="tnum text-xs text-[var(--ink-muted)]">
               Unit {currentCard.unitId} · 복습 {queueIndex + 1} / {validQueue.length}
             </p>
           </div>
         </div>
         <Link
           to={`/unit/${currentCard.unitId}`}
-          className="text-xs font-semibold text-blue-800 hover:underline dark:text-blue-300"
+          className="text-xs font-semibold text-[var(--accent)] hover:underline"
         >
           단원 개념 보기 →
         </Link>
       </div>
 
-      <div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="rounded-xl border border-[var(--border-subtle)] border-t-2 border-t-[var(--accent)] bg-[var(--bg-surface)] p-5 sm:p-6">
         <ExerciseCard
           exercise={currentExercise}
           languageMode={settings.languageMode}

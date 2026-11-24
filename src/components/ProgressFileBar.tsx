@@ -62,36 +62,40 @@ export function ProgressFileBar() {
   return (
     <section
       aria-label="로컬 진도 파일 관리"
-      className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+      className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-subtle)]/70 px-4 py-3"
     >
-      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-        <div className="space-y-1">
+      <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
+        <div className="space-y-0.5">
           <div className="flex flex-wrap items-center gap-2">
-            <HardDrive className="h-4 w-4 text-blue-900 dark:text-blue-300" />
-            <h2 className="text-base font-bold text-slate-900 dark:text-white">
+            <HardDrive className="h-3.5 w-3.5 text-[var(--ink-secondary)]" />
+            <h2 className="text-sm font-semibold text-[var(--ink-primary)]">
               로컬 진도 파일 관리
             </h2>
             {fileSync.fileName ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300">
+              <span className="inline-flex items-center gap-1 rounded-md border border-[var(--success-border)] bg-[var(--success-soft)] px-2 py-0.5 text-[11px] font-semibold text-[var(--success)]">
                 <CheckCircle2 className="h-3 w-3" />
                 연결된 파일: {fileSync.fileName}
               </span>
             ) : (
-              <span className="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+              <span className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2 py-0.5 text-[11px] font-medium text-[var(--ink-muted)]">
                 로컬 파일 미연결
               </span>
             )}
             {fileSync.hasUnsavedChanges && (
-              <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-bold text-amber-900 dark:bg-amber-950/60 dark:text-amber-300">
+              <span className="rounded-md border border-[var(--signal-border)] bg-[var(--signal-soft)] px-2 py-0.5 text-[11px] font-semibold text-[var(--signal)]">
                 저장되지 않은 변경 있음
               </span>
             )}
           </div>
-          <p className="text-xs text-slate-600 dark:text-slate-300">
-            학습 진도를 내 PC의 JSON 파일로 저장하고, 다른 기기나 재방문 시 파일을 선택해 바로 이어서 공부할 수 있습니다.
+          <p className="text-xs text-[var(--ink-secondary)]">
+            학습 진도를 내 PC의 JSON 파일로 저장하고, 재방문 시 파일을 선택해 이어서 공부합니다.
             {fileSync.lastSavedAt && (
-              <span className="ml-1.5 text-slate-500 dark:text-slate-400">
-                (최근 저장: {new Date(fileSync.lastSavedAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })})
+              <span className="tnum ml-1.5 text-[var(--ink-muted)]">
+                · 최근 저장{' '}
+                {new Date(fileSync.lastSavedAt).toLocaleTimeString('ko-KR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
               </span>
             )}
           </p>
@@ -102,13 +106,13 @@ export function ProgressFileBar() {
             <button
               type="button"
               onClick={toggleAutoSave}
-              className={`inline-flex items-center gap-1 rounded-xl border px-3 py-2 text-xs font-semibold transition ${
+              className={`pressable inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-semibold ${
                 fileSync.autoSaveEnabled
-                  ? 'border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-200'
-                  : 'border-stone-200 bg-stone-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                  ? 'border-[var(--success-border)] bg-[var(--success-soft)] text-[var(--success)]'
+                  : 'interactive-surface border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--ink-secondary)]'
               }`}
             >
-              <RefreshCw className="h-3.5 w-3.5" />
+              <RefreshCw className="h-3 w-3" />
               자동 저장 {fileSync.autoSaveEnabled ? '켜짐' : '꺼짐'}
             </button>
           )}
@@ -116,9 +120,9 @@ export function ProgressFileBar() {
           <button
             type="button"
             onClick={() => void handleSave(false)}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-blue-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500"
+            className="pressable interactive-btn-accent inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-btn)] px-3.5 py-1.5 text-xs font-semibold text-white"
           >
-            <FileDown className="h-4 w-4" />
+            <FileDown className="h-3.5 w-3.5" />
             진도 파일 저장
           </button>
 
@@ -126,7 +130,7 @@ export function ProgressFileBar() {
             <button
               type="button"
               onClick={() => void handleSave(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 transition hover:bg-stone-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+              className="pressable interactive-surface interactive-border rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--ink-primary)]"
             >
               다른 파일로 저장
             </button>
@@ -136,14 +140,14 @@ export function ProgressFileBar() {
             <button
               type="button"
               onClick={() => void handlePickerOpen()}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 bg-white px-4 py-2 text-xs font-semibold text-slate-800 transition hover:bg-stone-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+              className="pressable interactive-surface interactive-border inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3.5 py-1.5 text-xs font-semibold text-[var(--ink-primary)]"
             >
-              <FileUp className="h-4 w-4" />
+              <FileUp className="h-3.5 w-3.5 text-[var(--ink-secondary)]" />
               진도 파일 불러오기
             </button>
           ) : (
-            <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-stone-300 bg-white px-4 py-2 text-xs font-semibold text-slate-800 transition hover:bg-stone-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700">
-              <FileUp className="h-4 w-4" />
+            <label className="pressable interactive-surface interactive-border inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3.5 py-1.5 text-xs font-semibold text-[var(--ink-primary)]">
+              <FileUp className="h-3.5 w-3.5 text-[var(--ink-secondary)]" />
               <span>진도 파일 불러오기</span>
               <input
                 type="file"
@@ -160,10 +164,10 @@ export function ProgressFileBar() {
       {(feedback || fileSync.autoSaveError) && (
         <div
           role="status"
-          className={`mt-3 rounded-xl px-3.5 py-2 text-xs font-medium ${
+          className={`feedback-enter mt-3 rounded-lg border border-l-2 px-3 py-2 text-xs font-medium ${
             fileSync.autoSaveError || feedback?.type === 'err'
-              ? 'bg-red-50 text-red-900 dark:bg-red-950/40 dark:text-red-200'
-              : 'bg-emerald-50 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200'
+              ? 'border-[var(--danger-border)] border-l-[var(--danger)] bg-[var(--danger-soft)] text-[var(--danger)]'
+              : 'border-[var(--success-border)] border-l-[var(--success)] bg-[var(--success-soft)] text-[var(--success)]'
           }`}
         >
           {fileSync.autoSaveError ?? feedback?.text}

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowRight, CheckCircle2, RotateCcw, Sparkles, XCircle } from 'lucide-react';
+import { ArrowRight, CheckCircle2, RotateCcw, XCircle } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { gradeAnswer } from '../lib/grader';
 import type { Exercise, ExerciseType } from '../types/grammar';
@@ -56,42 +56,44 @@ export function ExerciseCard({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-900 dark:bg-blue-950/60 dark:text-blue-200">
+        <span className="inline-flex items-center rounded border border-[var(--border-subtle)] bg-[var(--bg-subtle)] px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-[var(--ink-secondary)]">
           {languageMode === 'bilingual' ? `${label.ko} · ${label.en}` : label.en}
         </span>
       </div>
 
       <div>
-        <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+        <p className="text-sm font-semibold text-[var(--ink-primary)]">
           {languageMode === 'bilingual' ? exercise.instructionKo : exercise.instructionEn}
         </p>
         {languageMode === 'bilingual' && (
-          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+          <p className="mt-0.5 text-xs text-[var(--ink-muted)]">
             {exercise.instructionEn}
           </p>
         )}
       </div>
 
       {exercise.dialogueContext && (
-        <div className="space-y-2 rounded-xl border border-stone-200 bg-stone-50 p-3.5 dark:border-slate-700 dark:bg-slate-800/60">
+        <div className="space-y-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-subtle)]/70 p-3.5">
           {exercise.dialogueContext.map((turn, idx) => (
             <div key={idx} className="flex items-start gap-2.5 text-sm">
-              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-200 text-xs font-bold text-slate-700 dark:bg-slate-700 dark:text-slate-200">
+              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border border-[var(--border-strong)] bg-[var(--bg-surface)] text-[11px] font-bold text-[var(--ink-secondary)]">
                 {turn.speaker}
               </span>
-              <span className="text-slate-800 dark:text-slate-100">{turn.line}</span>
+              <span className="font-editorial text-[15px] text-[var(--ink-primary)]">
+                {turn.line}
+              </span>
             </div>
           ))}
         </div>
       )}
 
-      <div className="rounded-xl border border-stone-200 bg-white p-4 text-base font-medium leading-relaxed text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+      <div className="font-editorial rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-subtle)] px-4 py-4 text-[17px] leading-relaxed text-[var(--ink-primary)]">
         {exercise.prompt}
       </div>
 
       {exercise.wordBank && exercise.wordBank.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-xs font-medium text-slate-500 dark:text-slate-400">보기:</span>
+          <span className="text-xs font-medium text-[var(--ink-muted)]">보기:</span>
           {exercise.wordBank.map((word) => (
             <button
               key={word}
@@ -100,7 +102,7 @@ export function ExerciseCard({
               onClick={() =>
                 setTextInput((prev) => (prev.trim() ? `${prev.trim()} ${word}` : word))
               }
-              className="rounded-md border border-stone-300 bg-stone-100 px-2.5 py-1 text-xs font-semibold text-slate-800 transition hover:border-blue-500 hover:bg-blue-50 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              className="pressable interactive-surface interactive-accent-border rounded-md border border-[var(--border-strong)] bg-[var(--bg-surface)] px-2.5 py-1 text-xs font-semibold text-[var(--ink-primary)] disabled:opacity-50"
             >
               {word}
             </button>
@@ -120,19 +122,19 @@ export function ExerciseCard({
                   (a) => a.toLowerCase() === opt.toLowerCase(),
                 );
               let optionClass =
-                'border-stone-200 bg-white hover:border-blue-400 dark:border-slate-700 dark:bg-slate-900';
+                'interactive-surface interactive-border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--ink-primary)]';
 
               if (submitted) {
                 if (isAccepted) {
                   optionClass =
-                    'border-emerald-500 bg-emerald-50 text-emerald-950 dark:border-emerald-500 dark:bg-emerald-950/40 dark:text-emerald-100';
+                    'border-[var(--success-border)] bg-[var(--success-soft)] text-[var(--success)]';
                 } else if (isSelected && !submitted.isCorrect) {
                   optionClass =
-                    'border-red-400 bg-red-50 text-red-950 dark:border-red-500 dark:bg-red-950/40 dark:text-red-100';
+                    'border-[var(--danger-border)] bg-[var(--danger-soft)] text-[var(--danger)]';
                 }
               } else if (isSelected) {
                 optionClass =
-                  'border-blue-800 bg-blue-50 text-blue-950 dark:border-blue-400 dark:bg-blue-950/50 dark:text-blue-100';
+                  'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent)]';
               }
 
               return (
@@ -141,7 +143,7 @@ export function ExerciseCard({
                   type="button"
                   disabled={Boolean(submitted)}
                   onClick={() => setSelectedOption(opt)}
-                  className={`flex items-center gap-3 rounded-xl border px-3.5 py-2.5 text-left text-sm font-medium transition ${optionClass}`}
+                  className={`pressable-subtle flex items-center gap-3 rounded-xl border px-3.5 py-2.5 text-left text-sm font-medium ${optionClass}`}
                 >
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-current/25 text-xs font-bold">
                     {letter}
@@ -163,7 +165,7 @@ export function ExerciseCard({
               disabled={Boolean(submitted)}
               onChange={(e) => setTextInput(e.target.value)}
               placeholder="정답을 입력하십시오 (축약형·전체형 모두 인정)"
-              className="w-full rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-sm text-slate-900 focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-700/20 disabled:bg-stone-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:disabled:bg-slate-800"
+              className="w-full rounded-xl border border-[var(--border-strong)] bg-[var(--bg-surface)] px-4 py-2.5 text-sm text-[var(--ink-primary)] placeholder:text-[var(--ink-muted)] transition-[border-color,background-color] duration-150 focus:border-[var(--accent)] focus:outline-none disabled:bg-[var(--bg-subtle)]"
             />
           </div>
         )}
@@ -172,7 +174,7 @@ export function ExerciseCard({
           <button
             type="submit"
             disabled={!currentAnswer.trim()}
-            className="w-full rounded-xl bg-blue-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-45 dark:bg-blue-600 dark:hover:bg-blue-500"
+            className="pressable interactive-btn-accent w-full rounded-lg bg-[var(--accent-btn)] px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
           >
             정답 확인
           </button>
@@ -181,25 +183,25 @@ export function ExerciseCard({
 
       {submitted && (
         <div
-          className={`space-y-3 rounded-xl border p-4 ${
+          className={`feedback-enter space-y-3 rounded-xl border border-l-2 p-4 ${
             submitted.isCorrect
-              ? 'border-emerald-300 bg-emerald-50/80 dark:border-emerald-700 dark:bg-emerald-950/30'
-              : 'border-red-300 bg-red-50/80 dark:border-red-700 dark:bg-red-950/30'
+              ? 'border-[var(--success-border)] border-l-[var(--success)] bg-[var(--success-soft)]'
+              : 'border-[var(--danger-border)] border-l-[var(--danger)] bg-[var(--danger-soft)]'
           }`}
         >
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               {submitted.isCorrect ? (
                 <>
-                  <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                  <span className="text-sm font-bold text-emerald-900 dark:text-emerald-200">
+                  <CheckCircle2 className="h-5 w-5 text-[var(--success)]" />
+                  <span className="text-sm font-bold text-[var(--success)]">
                     정답입니다!
                   </span>
                 </>
               ) : (
                 <>
-                  <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
-                  <span className="text-sm font-bold text-red-900 dark:text-red-200">
+                  <XCircle className="h-5 w-5 text-[var(--danger)]" />
+                  <span className="text-sm font-bold text-[var(--danger)]">
                     아쉽습니다. 정답은 &ldquo;{exercise.acceptedAnswers[0]}&rdquo;입니다.
                   </span>
                 </>
@@ -208,21 +210,21 @@ export function ExerciseCard({
             <SpeakButton text={exercise.fullSentence} compact showSlowOption />
           </div>
 
-          <p className="rounded-lg bg-white/80 px-3 py-2 text-sm font-medium text-slate-800 dark:bg-slate-900/70 dark:text-slate-100">
+          <p className="font-editorial rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3.5 py-2.5 text-[15.5px] text-[var(--ink-primary)]">
             {exercise.fullSentence}
           </p>
 
-          <p className="text-sm text-slate-700 dark:text-slate-200">
+          <p className="text-sm leading-relaxed text-[var(--ink-primary)]">
             {languageMode === 'bilingual' ? exercise.explanationKo : exercise.explanationEn}
           </p>
           {languageMode === 'bilingual' && (
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs leading-relaxed text-[var(--ink-secondary)]">
               {exercise.explanationEn}
             </p>
           )}
 
           {extraFeedbackText && (
-            <p className="text-xs font-semibold text-blue-900 dark:text-blue-300">
+            <p className="text-xs font-semibold text-[var(--accent)]">
               {extraFeedbackText}
             </p>
           )}
@@ -230,7 +232,7 @@ export function ExerciseCard({
           <button
             type="button"
             onClick={onNext}
-            className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+            className="pressable interactive-btn-ink inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-[var(--ink-primary)] px-4 py-2.5 text-sm font-semibold text-[var(--bg-canvas)]"
           >
             <span>{actionLabel}</span>
             <ArrowRight className="h-4 w-4" />
@@ -277,22 +279,32 @@ export function ExerciseRunner({ unitId, exercises, onGoNextUnit }: ExerciseRunn
     const unitCompleted = Boolean(unitProg?.completedAt);
 
     return (
-      <div className="space-y-4 rounded-2xl border border-stone-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex items-center gap-2 text-blue-900 dark:text-blue-300">
-          <Sparkles className="h-5 w-5" />
-          <h3 className="text-lg font-bold">Unit {unitId} 연습 완료</h3>
+      <div className="space-y-5 rounded-xl border border-[var(--border-subtle)] border-t-2 border-t-[var(--accent)] bg-[var(--bg-surface)] p-6">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <span className="font-mono-code text-[11px] font-semibold uppercase tracking-wider text-[var(--accent)]">
+              UNIT {unitId} COMPLETE
+            </span>
+            <h3 className="mt-1 text-lg font-bold text-[var(--ink-primary)]">
+              Unit {unitId} 연습 완료
+            </h3>
+          </div>
+          {unitCompleted && (
+            <CheckCircle2 className="h-6 w-6 text-[var(--success)]" />
+          )}
         </div>
 
-        <div className="rounded-xl bg-stone-50 p-4 dark:bg-slate-800/70">
-          <div className="text-3xl font-bold text-slate-900 dark:text-white">
-            {correctCount} / {totalCount} ({pct}%)
+        <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-subtle)] p-4">
+          <div className="font-editorial tnum text-3xl font-semibold text-[var(--ink-primary)]">
+            {correctCount} / {totalCount}{' '}
+            <span className="text-xl text-[var(--ink-secondary)]">({pct}%)</span>
           </div>
           {isRetrySubset && unitProg && (
-            <p className="mt-1 text-xs font-semibold text-blue-900 dark:text-blue-300">
+            <p className="tnum mt-1 text-xs font-semibold text-[var(--accent)]">
               단원 전체 누적: {unitProg.correctExerciseIds.length} / {exercises.length} ({unitProg.bestScore}%)
             </p>
           )}
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+          <p className="mt-1.5 text-sm text-[var(--ink-secondary)]">
             {unitCompleted
               ? '통과 기준(75%)을 넘겨 단원 학습을 완료했습니다.'
               : '틀린 문항이 내일 복습 큐에 예약되었습니다. 다시 풀며 다져 보십시오.'}
@@ -309,7 +321,7 @@ export function ExerciseRunner({ unitId, exercises, onGoNextUnit }: ExerciseRunn
                 setResults({});
                 setFinished(false);
               }}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-900 hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200 dark:hover:bg-amber-950/60"
+              className="pressable inline-flex items-center gap-1.5 rounded-lg border border-[var(--signal-border)] bg-[var(--signal-soft)] px-4 py-2 text-sm font-semibold text-[var(--signal)]"
             >
               <RotateCcw className="h-4 w-4" />
               틀린 문제만 다시 풀기 ({wrongExercises.length})
@@ -323,7 +335,7 @@ export function ExerciseRunner({ unitId, exercises, onGoNextUnit }: ExerciseRunn
               setResults({});
               setFinished(false);
             }}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-stone-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+            className="pressable interactive-surface interactive-border inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-4 py-2 text-sm font-semibold text-[var(--ink-primary)]"
           >
             전체 다시 풀기
           </button>
@@ -331,7 +343,7 @@ export function ExerciseRunner({ unitId, exercises, onGoNextUnit }: ExerciseRunn
             <button
               type="button"
               onClick={onGoNextUnit}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-blue-900 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500"
+              className="pressable interactive-btn-accent inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-btn)] px-4 py-2 text-sm font-semibold text-white"
             >
               다음 심화 단원
               <ArrowRight className="h-4 w-4" />
@@ -343,15 +355,21 @@ export function ExerciseRunner({ unitId, exercises, onGoNextUnit }: ExerciseRunn
   }
 
   return (
-    <div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <div className="mb-4 flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400">
-        <span>
-          연습 문제 {index + 1} / {activePool.length}
-        </span>
-        <div className="h-1.5 w-32 overflow-hidden rounded-full bg-stone-200 dark:bg-slate-800">
+    <div className="rounded-xl border border-[var(--border-subtle)] border-t-2 border-t-[var(--accent)] bg-[var(--bg-surface)] p-5 sm:p-6">
+      <div className="mb-4 flex items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-3 text-xs font-semibold text-[var(--ink-muted)]">
+        <div className="flex items-center gap-2">
+          <span className="font-mono-code text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--accent)]">
+            WORKBOOK
+          </span>
+          <span className="text-[var(--border-strong)]">·</span>
+          <span className="tnum">
+            연습 문제 {index + 1} / {activePool.length}
+          </span>
+        </div>
+        <div className="h-[3px] w-28 overflow-hidden rounded-full bg-[var(--bg-subtle)]">
           <div
-            className="h-full bg-blue-900 transition-all dark:bg-blue-500"
-            style={{ width: `${Math.round(((index + 1) / activePool.length) * 100)}%` }}
+            className="progress-fill h-full w-full bg-[var(--accent)]"
+            style={{ transform: `scaleX(${(index + 1) / activePool.length})` }}
           />
         </div>
       </div>
