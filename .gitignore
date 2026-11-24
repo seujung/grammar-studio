@@ -1,0 +1,7 @@
+node_modules/
+dist/
+coverage/
+.superpowers/
+reference/*.pdf
+.DS_Store
+*.local
