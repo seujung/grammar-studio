@@ -4,6 +4,7 @@ import { CheckCircle2, RotateCw, Sparkles } from 'lucide-react';
 import { ExerciseCard } from '../components/ExerciseRunner';
 import { useApp } from '../context/AppContext';
 import { getExerciseById } from '../data/units';
+import { toDateKey } from '../lib/srs';
 import type { SrsCard } from '../types/grammar';
 
 export function ReviewPage() {
@@ -13,8 +14,12 @@ export function ReviewPage() {
   const [lastIntervalMsg, setLastIntervalMsg] = useState<string>('');
   const [reviewedCount, setReviewedCount] = useState(0);
 
-  const activeQueue = sessionQueue ?? dueCards;
-  const currentCard = activeQueue[queueIndex];
+  const validQueue = useMemo(() => {
+    const raw = sessionQueue ?? dueCards;
+    return raw.filter((card) => Boolean(getExerciseById(card.exerciseId)));
+  }, [sessionQueue, dueCards]);
+
+  const currentCard = validQueue[queueIndex];
   const currentExercise = currentCard ? getExerciseById(currentCard.exerciseId) : undefined;
 
   const totalTracked = Object.keys(progress.srsCards).length;
@@ -26,7 +31,7 @@ export function ReviewPage() {
     [progress.srsCards],
   );
 
-  if (activeQueue.length === 0 || !currentCard || !currentExercise) {
+  if (validQueue.length === 0 || !currentCard || !currentExercise) {
     return (
       <div className="mx-auto max-w-2xl space-y-6">
         <div className="rounded-2xl border border-stone-200 bg-white p-8 text-center dark:border-slate-800 dark:bg-slate-900">
@@ -44,7 +49,7 @@ export function ReviewPage() {
           <div className="mt-5 flex justify-center gap-3">
             <Link
               to="/curriculum"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-blue-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 dark:bg-blue-600"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-blue-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500"
             >
               <Sparkles className="h-4 w-4" />
               커리큘럼에서 학습하기
@@ -67,7 +72,7 @@ export function ReviewPage() {
                     Unit {card.unitId} · {card.exerciseId} (간격 {card.intervalDays}일)
                   </span>
                   <span className="font-semibold">
-                    {card.nextReviewAt.slice(0, 10)} 예정
+                    {toDateKey(new Date(card.nextReviewAt))} 예정
                   </span>
                 </li>
               ))}
@@ -88,7 +93,7 @@ export function ReviewPage() {
               오늘의 간격 반복 복습 (SRS)
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Unit {currentCard.unitId} · 복습 {queueIndex + 1} / {activeQueue.length}
+              Unit {currentCard.unitId} · 복습 {queueIndex + 1} / {validQueue.length}
             </p>
           </div>
         </div>
@@ -106,7 +111,7 @@ export function ReviewPage() {
           languageMode={settings.languageMode}
           onGraded={(isCorrect) => {
             if (!sessionQueue) {
-              setSessionQueue(dueCards);
+              setSessionQueue(validQueue);
             }
             const updated = submitSrsReview(currentCard.exerciseId, isCorrect);
             setReviewedCount((c) => c + 1);
@@ -119,13 +124,13 @@ export function ReviewPage() {
             }
           }}
           extraFeedbackText={lastIntervalMsg}
-          actionLabel={queueIndex + 1 < activeQueue.length ? '다음 복습 카드' : '복습 마침'}
+          actionLabel={queueIndex + 1 < validQueue.length ? '다음 복습 카드' : '복습 마침'}
           onNext={() => {
             setLastIntervalMsg('');
-            if (queueIndex + 1 < activeQueue.length) {
+            if (queueIndex + 1 < validQueue.length) {
               setQueueIndex((i) => i + 1);
             } else {
-              setSessionQueue([]);
+              setSessionQueue(null);
               setQueueIndex(0);
             }
           }}

@@ -10,12 +10,11 @@ type StatusFilter = 'all' | 'deep' | 'recommended' | 'completed' | 'incomplete';
 export function CurriculumPage() {
   const { progress } = useApp();
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialCat = searchParams.get('category') as CategoryId | null;
+  const paramCat = searchParams.get('category') as CategoryId | null;
+  const selectedCategory: CategoryId | 'all' =
+    paramCat && CATEGORIES.some((c) => c.id === paramCat) ? paramCat : 'all';
 
   const [query, setQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<CategoryId | 'all'>(
-    initialCat && CATEGORIES.some((c) => c.id === initialCat) ? initialCat : 'all',
-  );
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
   const recommendedSet = useMemo(
@@ -44,13 +43,13 @@ export function CurriculumPage() {
   }, [query, selectedCategory, statusFilter, progress.unitProgress, recommendedSet]);
 
   const handleCategoryChange = (cat: CategoryId | 'all') => {
-    setSelectedCategory(cat);
+    const next = new URLSearchParams(searchParams);
     if (cat === 'all') {
-      searchParams.delete('category');
-      setSearchParams(searchParams, { replace: true });
+      next.delete('category');
     } else {
-      setSearchParams({ category: cat }, { replace: true });
+      next.set('category', cat);
     }
+    setSearchParams(next, { replace: true });
   };
 
   return (

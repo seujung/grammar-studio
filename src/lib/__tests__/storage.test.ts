@@ -54,5 +54,22 @@ describe('storage and backup', () => {
 
     const bad = parseBackupJson('{"version":999}');
     expect(bad.ok).toBe(false);
+
+    const arrayProgress = parseBackupJson(
+      JSON.stringify({
+        app: 'grammar-in-use-studio',
+        version: 1,
+        progress: {
+          version: 1,
+          unitProgress: [],
+          srsCards: {},
+          diagnosticResult: 'bad',
+          studyDates: [],
+          dailyCompletedUnits: {},
+        },
+        settings: DEFAULT_SETTINGS,
+      }),
+    );
+    expect(arrayProgress.ok).toBe(false);
   });
 });

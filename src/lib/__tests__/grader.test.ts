@@ -37,4 +37,15 @@ describe('gradeAnswer', () => {
     expect(gradeAnswer('   ', ['is working']).isCorrect).toBe(false);
     expect(gradeAnswer('works', ['is working']).isCorrect).toBe(false);
   });
+
+  it('does not cross-match explicit "is" with "has" or "would" with "had"', () => {
+    expect(gradeAnswer('she has not using it', ['she is not using it']).isCorrect).toBe(false);
+    expect(gradeAnswer('i had go there', ['i would go there']).isCorrect).toBe(false);
+  });
+
+  it("handles modal perfect contractions like would've, could've, should've", () => {
+    expect(gradeAnswer("would've met", ['would have met']).isCorrect).toBe(true);
+    expect(gradeAnswer("could've done", ['could have done']).isCorrect).toBe(true);
+    expect(gradeAnswer("should've called", ['should have called']).isCorrect).toBe(true);
+  });
 });

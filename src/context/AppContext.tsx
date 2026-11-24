@@ -30,6 +30,7 @@ export interface FileSyncState {
   hasUnsavedChanges: boolean;
   autoSaveEnabled: boolean;
   supportsDirectFile: boolean;
+  autoSaveError: string | null;
 }
 
 export type SaveFileActionResult =
@@ -71,6 +72,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [progress, setProgress] = useState<UserProgress>(() => loadProgress());
   const [settings, setSettings] = useState<UserSettings>(() => loadSettings());
   const fileHandleRef = useRef<FileHandleLike | null>(null);
+  const pendingAutoSaveRef = useRef(false);
   const [mutationSeq, setMutationSeq] = useState(0);
   const [fileSync, setFileSync] = useState<FileSyncState>(() => ({
     fileName: null,
@@ -78,6 +80,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     hasUnsavedChanges: false,
     autoSaveEnabled: true,
     supportsDirectFile: isFileSystemAccessSupported(),
+    autoSaveError: null,
   }));
 
   useEffect(() => {
@@ -92,7 +95,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [settings]);
 
   useEffect(() => {
-    if (mutationSeq === 0) return;
+    if (mutationSeq === 0 || !pendingAutoSaveRef.current) return;
+    pendingAutoSaveRef.current = false;
     const handle = fileHandleRef.current;
     if (!handle || !fileSync.autoSaveEnabled) return;
 
@@ -106,6 +110,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           fileName: res.fileName,
           lastSavedAt: new Date().toISOString(),
           hasUnsavedChanges: false,
+          autoSaveError: null,
+        }));
+      } else if (!res.cancelled) {
+        setFileSync((prev) => ({
+          ...prev,
+          autoSaveError: res.error,
         }));
       }
     });
@@ -116,8 +126,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [mutationSeq, progress, settings, fileSync.autoSaveEnabled]);
 
   const markMutated = useCallback(() => {
+    pendingAutoSaveRef.current = true;
     setMutationSeq((s) => s + 1);
-    setFileSync((prev) => ({ ...prev, hasUnsavedChanges: true }));
+    setFileSync((prev) => ({ ...prev, hasUnsavedChanges: true, autoSaveError: null }));
   }, []);
 
   const recordExerciseAttempt = useCallback(
@@ -158,17 +169,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         };
 
         const existingCard = prev.srsCards[exerciseId];
-        const nextCard = existingCard
-          ? reviewSrsCard(existingCard, isCorrect, now)
-          : createSrsCard(exerciseId, unitId, isCorrect, now);
+        let nextCard: SrsCard;
+        if (!existingCard) {
+          nextCard = createSrsCard(exerciseId, unitId, isCorrect, now);
+        } else if (!isCorrect) {
+          nextCard = reviewSrsCard(existingCard, false, now);
+        } else if (new Date(existingCard.nextReviewAt).getTime() <= now.getTime()) {
+          nextCard = reviewSrsCard(existingCard, true, now);
+        } else {
+          // Do not advance SRS interval early on immediate same-day retry
+          nextCard = { ...existingCard, lastReviewedAt: now.toISOString() };
+        }
 
         const nextStudyDates = prev.studyDates.includes(todayKey)
           ? prev.studyDates
           : [...prev.studyDates, todayKey];
 
+        const newlyCompleted = !existing.completedAt && passed;
         const todayUnits = prev.dailyCompletedUnits[todayKey] ?? [];
         const nextTodayUnits =
-          passed && !todayUnits.includes(unitId) ? [...todayUnits, unitId] : todayUnits;
+          newlyCompleted && !todayUnits.includes(unitId) ? [...todayUnits, unitId] : todayUnits;
 
         return {
           ...prev,
@@ -275,6 +295,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         fileName: res.fileName,
         lastSavedAt: new Date().toISOString(),
         hasUnsavedChanges: false,
+        autoSaveError: null,
       }));
       return { ok: true, mode: res.mode, fileName: res.fileName };
     },
@@ -287,6 +308,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (!parsed.ok) {
         return { ok: false, error: parsed.error };
       }
+      pendingAutoSaveRef.current = false;
       fileHandleRef.current = null;
       setProgress(parsed.progress);
       setSettings(parsed.settings);
@@ -295,6 +317,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         fileName,
         lastSavedAt: new Date().toISOString(),
         hasUnsavedChanges: false,
+        autoSaveError: null,
       }));
       return { ok: true, fileName };
     },
@@ -310,6 +333,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (!parsed.ok) {
       return { ok: false, error: parsed.error };
     }
+    pendingAutoSaveRef.current = false;
     fileHandleRef.current = res.handle;
     setProgress(parsed.progress);
     setSettings(parsed.settings);
@@ -318,6 +342,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       fileName: res.fileName,
       lastSavedAt: new Date().toISOString(),
       hasUnsavedChanges: false,
+      autoSaveError: null,
     }));
     return { ok: true, fileName: res.fileName };
   }, []);
@@ -327,6 +352,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const resetAllProgress = useCallback(() => {
+    pendingAutoSaveRef.current = false;
     fileHandleRef.current = null;
     setProgress(DEFAULT_PROGRESS);
     setSettings(DEFAULT_SETTINGS);
@@ -335,6 +361,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       fileName: null,
       lastSavedAt: null,
       hasUnsavedChanges: false,
+      autoSaveError: null,
     }));
   }, []);
 

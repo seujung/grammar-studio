@@ -9,6 +9,8 @@ export interface FileHandleLike {
   name: string;
   getFile(): Promise<{ text(): Promise<string> }>;
   createWritable(): Promise<FileWritableLike>;
+  queryPermission?: (descriptor?: { mode?: 'read' | 'readwrite' }) => Promise<string>;
+  requestPermission?: (descriptor?: { mode?: 'read' | 'readwrite' }) => Promise<string>;
 }
 
 interface PickerWindow {
@@ -85,12 +87,32 @@ async function writeToHandle(handle: FileHandleLike, jsonContent: string): Promi
   }
 }
 
+async function ensureWritePermission(handle: FileHandleLike): Promise<boolean> {
+  if (typeof handle.queryPermission === 'function') {
+    const state = await handle.queryPermission({ mode: 'readwrite' });
+    if (state === 'granted') return true;
+  }
+  if (typeof handle.requestPermission === 'function') {
+    const nextState = await handle.requestPermission({ mode: 'readwrite' });
+    return nextState === 'granted';
+  }
+  return true;
+}
+
 export async function saveProgressToFile(
   jsonContent: string,
   existingHandle?: FileHandleLike | null,
 ): Promise<SaveFileResult> {
   if (existingHandle) {
     try {
+      const granted = await ensureWritePermission(existingHandle);
+      if (!granted) {
+        return {
+          ok: false,
+          cancelled: false,
+          error: '파일 쓰기 권한이 거부되었습니다. "다른 파일로 저장"으로 새 파일을 지정해 주십시오.',
+        };
+      }
       await writeToHandle(existingHandle, jsonContent);
       return {
         ok: true,
@@ -105,7 +127,7 @@ export async function saveProgressToFile(
       return {
         ok: false,
         cancelled: false,
-        error: '연결된 로컬 파일에 저장하지 못했습니다. 새 파일로 다시 저장해 보십시오.',
+        error: '연결된 로컬 파일에 저장하지 못했습니다. 다른 파일로 저장해 보십시오.',
       };
     }
   }

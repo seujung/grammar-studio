@@ -176,4 +176,41 @@ describe('Grammar in Use Studio UI integration', () => {
 
     clickSpy.mockRestore();
   });
+
+  it('syncs Curriculum category filter from Dashboard link and supports Diagnostic explanations + Modal Escape', async () => {
+    const user = userEvent.setup();
+    renderAt(['/']);
+
+    // Click a category card from Dashboard -> navigates to /curriculum?category=modals
+    await user.click(screen.getByRole('link', { name: /Modals/i }));
+    expect(screen.getByText('표시 중: 12개 단원')).toBeInTheDocument();
+
+    // Open and close settings modal via Escape
+    await user.click(screen.getByRole('button', { name: '설정 및 백업' }));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('shows diagnostic explanations and supports going back to previous question', async () => {
+    const user = userEvent.setup();
+    renderAt(['/diagnostic']);
+
+    await user.click(screen.getByRole('button', { name: /16문항 진단 시작하기/i }));
+
+    // Answer Q1, go back with 이전 문항, then complete all 16
+    await user.click(screen.getByRole('button', { name: /잘 모르겠어요/i }));
+    expect(screen.getByText(/문항 2 \/ 16/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: '이전 문항' }));
+    expect(screen.getByText(/문항 1 \/ 16/)).toBeInTheDocument();
+
+    for (let i = 0; i < 16; i++) {
+      const optionButtons = screen
+        .getAllByRole('button')
+        .filter((btn) => within(btn).queryByText('A'));
+      await user.click(optionButtons[0]);
+    }
+
+    expect(screen.getByText('문항별 정답 및 해설')).toBeInTheDocument();
+  });
 });

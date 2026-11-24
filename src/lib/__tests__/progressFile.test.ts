@@ -132,4 +132,22 @@ describe('progressFile helpers', () => {
       fileName: 'saved.json',
     });
   });
+
+  it('requests readwrite permission before writing and returns error when denied', async () => {
+    const readOnlyHandle: FileHandleLike = {
+      name: 'readonly.json',
+      getFile: vi.fn(),
+      createWritable: vi.fn(),
+      queryPermission: vi.fn().mockResolvedValue('prompt'),
+      requestPermission: vi.fn().mockResolvedValue('denied'),
+    };
+
+    const res = await saveProgressToFile('{"v":1}', readOnlyHandle);
+    expect(res.ok).toBe(false);
+    if (!res.ok) {
+      expect(res.cancelled).toBe(false);
+      expect(res.error).toContain('권한');
+    }
+    expect(readOnlyHandle.createWritable).not.toHaveBeenCalled();
+  });
 });

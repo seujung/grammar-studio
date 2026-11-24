@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Download, RotateCcw, Upload, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -12,6 +12,18 @@ export function BackupModal({ onClose }: { onClose: () => void }) {
   } = useApp();
   const [statusMessage, setStatusMessage] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    closeButtonRef.current?.focus();
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [onClose]);
 
   const handleDownload = async () => {
     const res = await saveProgressFile(true);
@@ -55,6 +67,9 @@ export function BackupModal({ onClose }: { onClose: () => void }) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="settings-modal-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <div className="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-6 shadow-xl dark:border-slate-700 dark:bg-slate-900">
         <div className="mb-5 flex items-center justify-between">
@@ -62,10 +77,11 @@ export function BackupModal({ onClose }: { onClose: () => void }) {
             학습 설정 및 데이터 백업
           </h2>
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={onClose}
             aria-label="창 닫기"
-            className="rounded-lg p-1.5 text-slate-500 hover:bg-stone-100 dark:hover:bg-slate-800"
+            className="rounded-lg p-1.5 text-slate-500 hover:bg-stone-100 dark:text-slate-300 dark:hover:bg-slate-800"
           >
             <X className="h-5 w-5" />
           </button>
@@ -147,20 +163,20 @@ export function BackupModal({ onClose }: { onClose: () => void }) {
             <div className="grid grid-cols-2 gap-2.5">
               <button
                 type="button"
-                onClick={handleDownload}
-                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 hover:bg-stone-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                onClick={() => void handleDownload()}
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 hover:bg-stone-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
               >
                 <Download className="h-4 w-4" />
                 JSON 내보내기
               </button>
-              <label className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 hover:bg-stone-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+              <label className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 hover:bg-stone-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700">
                 <Upload className="h-4 w-4" />
                 JSON 불러오기
                 <input
                   type="file"
                   accept="application/json,.json"
                   onChange={handleFileUpload}
-                  className="hidden"
+                  className="sr-only"
                 />
               </label>
             </div>

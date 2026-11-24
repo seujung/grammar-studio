@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   AlertCircle,
@@ -20,6 +20,10 @@ export function UnitStudyPage() {
   const navigate = useNavigate();
   const { settings } = useApp();
   const [mobileTab, setMobileTab] = useState<'concept' | 'practice'>('concept');
+
+  useEffect(() => {
+    setMobileTab('concept');
+  }, [unitId]);
 
   const numericId = Number(unitId);
   const summary = Number.isInteger(numericId) ? getUnitSummary(numericId) : undefined;
@@ -66,7 +70,7 @@ export function UnitStudyPage() {
           {summary.id > 1 && (
             <Link
               to={`/unit/${summary.id - 1}`}
-              className="inline-flex items-center gap-1 rounded-lg border border-stone-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-stone-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+              className="inline-flex items-center gap-1 rounded-lg border border-stone-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-stone-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Unit {summary.id - 1}
@@ -75,7 +79,7 @@ export function UnitStudyPage() {
           {summary.id < 145 && (
             <Link
               to={`/unit/${summary.id + 1}`}
-              className="inline-flex items-center gap-1 rounded-lg border border-stone-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-stone-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+              className="inline-flex items-center gap-1 rounded-lg border border-stone-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-stone-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
             >
               Unit {summary.id + 1}
               <ArrowRight className="h-3.5 w-3.5" />

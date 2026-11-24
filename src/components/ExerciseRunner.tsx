@@ -248,7 +248,7 @@ interface ExerciseRunnerProps {
 }
 
 export function ExerciseRunner({ unitId, exercises, onGoNextUnit }: ExerciseRunnerProps) {
-  const { settings, recordExerciseAttempt } = useApp();
+  const { progress, settings, recordExerciseAttempt } = useApp();
   const [activePool, setActivePool] = useState<Exercise[]>(exercises);
   const [index, setIndex] = useState(0);
   const [results, setResults] = useState<Record<string, boolean>>({});
@@ -272,6 +272,9 @@ export function ExerciseRunner({ unitId, exercises, onGoNextUnit }: ExerciseRunn
     const correctCount = Object.values(results).filter(Boolean).length;
     const totalCount = activePool.length;
     const pct = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
+    const unitProg = progress.unitProgress[unitId];
+    const isRetrySubset = activePool.length < exercises.length;
+    const unitCompleted = Boolean(unitProg?.completedAt);
 
     return (
       <div className="space-y-4 rounded-2xl border border-stone-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
@@ -284,8 +287,13 @@ export function ExerciseRunner({ unitId, exercises, onGoNextUnit }: ExerciseRunn
           <div className="text-3xl font-bold text-slate-900 dark:text-white">
             {correctCount} / {totalCount} ({pct}%)
           </div>
+          {isRetrySubset && unitProg && (
+            <p className="mt-1 text-xs font-semibold text-blue-900 dark:text-blue-300">
+              단원 전체 누적: {unitProg.correctExerciseIds.length} / {exercises.length} ({unitProg.bestScore}%)
+            </p>
+          )}
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-            {pct >= 75
+            {unitCompleted
               ? '통과 기준(75%)을 넘겨 단원 학습을 완료했습니다.'
               : '틀린 문항이 내일 복습 큐에 예약되었습니다. 다시 풀며 다져 보십시오.'}
           </p>
@@ -301,7 +309,7 @@ export function ExerciseRunner({ unitId, exercises, onGoNextUnit }: ExerciseRunn
                 setResults({});
                 setFinished(false);
               }}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-900 hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-900 hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200 dark:hover:bg-amber-950/60"
             >
               <RotateCcw className="h-4 w-4" />
               틀린 문제만 다시 풀기 ({wrongExercises.length})
@@ -315,7 +323,7 @@ export function ExerciseRunner({ unitId, exercises, onGoNextUnit }: ExerciseRunn
               setResults({});
               setFinished(false);
             }}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-stone-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-stone-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
           >
             전체 다시 풀기
           </button>
@@ -323,7 +331,7 @@ export function ExerciseRunner({ unitId, exercises, onGoNextUnit }: ExerciseRunn
             <button
               type="button"
               onClick={onGoNextUnit}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-blue-900 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 dark:bg-blue-600"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-blue-900 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500"
             >
               다음 심화 단원
               <ArrowRight className="h-4 w-4" />

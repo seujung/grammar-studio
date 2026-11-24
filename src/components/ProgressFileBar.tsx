@@ -122,17 +122,27 @@ export function ProgressFileBar() {
             진도 파일 저장
           </button>
 
+          {fileSync.supportsDirectFile && fileSync.fileName && (
+            <button
+              type="button"
+              onClick={() => void handleSave(true)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 transition hover:bg-stone-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+            >
+              다른 파일로 저장
+            </button>
+          )}
+
           {fileSync.supportsDirectFile ? (
             <button
               type="button"
               onClick={() => void handlePickerOpen()}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 bg-white px-4 py-2 text-xs font-semibold text-slate-800 transition hover:bg-stone-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 bg-white px-4 py-2 text-xs font-semibold text-slate-800 transition hover:bg-stone-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
             >
               <FileUp className="h-4 w-4" />
               진도 파일 불러오기
             </button>
           ) : (
-            <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-stone-300 bg-white px-4 py-2 text-xs font-semibold text-slate-800 transition hover:bg-stone-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+            <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-stone-300 bg-white px-4 py-2 text-xs font-semibold text-slate-800 transition hover:bg-stone-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700">
               <FileUp className="h-4 w-4" />
               <span>진도 파일 불러오기</span>
               <input
@@ -147,16 +157,16 @@ export function ProgressFileBar() {
         </div>
       </div>
 
-      {feedback && (
+      {(feedback || fileSync.autoSaveError) && (
         <div
           role="status"
           className={`mt-3 rounded-xl px-3.5 py-2 text-xs font-medium ${
-            feedback.type === 'ok'
-              ? 'bg-emerald-50 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200'
-              : 'bg-red-50 text-red-900 dark:bg-red-950/40 dark:text-red-200'
+            fileSync.autoSaveError || feedback?.type === 'err'
+              ? 'bg-red-50 text-red-900 dark:bg-red-950/40 dark:text-red-200'
+              : 'bg-emerald-50 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200'
           }`}
         >
-          {feedback.text}
+          {fileSync.autoSaveError ?? feedback?.text}
         </div>
       )}
     </section>

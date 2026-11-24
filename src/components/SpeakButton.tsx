@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { isTtsSupported, speakText, stopSpeaking } from '../lib/tts';
@@ -16,7 +16,18 @@ export function SpeakButton({
 }: SpeakButtonProps) {
   const { settings } = useApp();
   const [speaking, setSpeaking] = useState(false);
+  const speakingRef = useRef(false);
+  const activeRateRef = useRef<1 | 0.75>(1);
   const supported = isTtsSupported();
+
+  useEffect(() => {
+    return () => {
+      if (speakingRef.current) {
+        stopSpeaking();
+        speakingRef.current = false;
+      }
+    };
+  }, []);
 
   if (!supported) {
     return (
@@ -30,16 +41,24 @@ export function SpeakButton({
   }
 
   const handlePlay = (rate: 1 | 0.75) => {
-    if (speaking) {
+    if (speakingRef.current && activeRateRef.current === rate) {
       stopSpeaking();
+      speakingRef.current = false;
       setSpeaking(false);
       return;
     }
+    activeRateRef.current = rate;
     speakText(text, {
       accent: settings.accent,
       rate,
-      onStart: () => setSpeaking(true),
-      onEnd: () => setSpeaking(false),
+      onStart: () => {
+        speakingRef.current = true;
+        setSpeaking(true);
+      },
+      onEnd: () => {
+        speakingRef.current = false;
+        setSpeaking(false);
+      },
     });
   };
 
@@ -65,7 +84,7 @@ export function SpeakButton({
           onClick={() => handlePlay(0.75)}
           aria-label={`느리게 듣기: ${text}`}
           title="0.75x 느리게 듣기"
-          className="rounded-md border border-stone-200 bg-white px-1.5 py-1 text-[11px] font-medium text-slate-600 transition hover:border-blue-400 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+          className="rounded-md border border-stone-200 bg-white px-1.5 py-1 text-[11px] font-medium text-slate-600 transition hover:border-blue-400 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-blue-500"
         >
           0.75x
         </button>

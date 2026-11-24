@@ -1,6 +1,15 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Compass, HelpCircle, RotateCcw, AlertTriangle } from 'lucide-react';
+import {
+  AlertTriangle,
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  Compass,
+  HelpCircle,
+  RotateCcw,
+  XCircle,
+} from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { DIAGNOSTIC_QUESTIONS } from '../data/diagnostic';
 import { CATEGORIES, SYLLABUS_UNITS, getCategoryById, getUnitSummary } from '../data/syllabus';
@@ -14,6 +23,7 @@ export function DiagnosticPage() {
 
   const existingResult = progress.diagnosticResult;
   const currentQuestion = DIAGNOSTIC_QUESTIONS[stepIndex];
+  const bilingual = settings.languageMode === 'bilingual';
 
   const handleAnswer = (choice: number | 'unsure') => {
     if (!currentQuestion) return;
@@ -58,7 +68,7 @@ export function DiagnosticPage() {
               setStepIndex(0);
               setStarted(true);
             }}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-stone-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-stone-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
           >
             <RotateCcw className="h-4 w-4" />
             다시 진단하기
@@ -136,7 +146,7 @@ export function DiagnosticPage() {
                     </div>
                     <Link
                       to={`/unit/${u.id}`}
-                      className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-blue-900 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-800 dark:bg-blue-600"
+                      className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-blue-900 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500"
                     >
                       학습 시작
                       <ArrowRight className="h-3.5 w-3.5" />
@@ -146,6 +156,67 @@ export function DiagnosticPage() {
               })}
             </div>
           )}
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white">문항별 정답 및 해설</h2>
+          <div className="space-y-2.5">
+            {DIAGNOSTIC_QUESTIONS.map((q, idx) => {
+              const userAns = existingResult.answers[q.id];
+              const isCorrect = userAns === q.correctIndex;
+              const userText =
+                userAns === 'unsure'
+                  ? '잘 모르겠어요'
+                  : typeof userAns === 'number'
+                    ? q.options[userAns] ?? '미응답'
+                    : '미응답';
+              const cat = getCategoryById(q.categoryId);
+
+              return (
+                <div
+                  key={q.id}
+                  className={`rounded-xl border p-4 text-sm ${
+                    isCorrect
+                      ? 'border-stone-200 bg-white dark:border-slate-800 dark:bg-slate-900'
+                      : 'border-amber-200 bg-amber-50/40 dark:border-amber-900/60 dark:bg-amber-950/20'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="font-semibold text-slate-900 dark:text-white">
+                      {idx + 1}. {q.prompt}
+                    </div>
+                    <span
+                      className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                        isCorrect
+                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
+                          : 'bg-red-100 text-red-800 dark:bg-red-950/60 dark:text-red-300'
+                      }`}
+                    >
+                      {isCorrect ? (
+                        <>
+                          <CheckCircle2 className="h-3 w-3" /> 정답
+                        </>
+                      ) : (
+                        <>
+                          <XCircle className="h-3 w-3" /> 복습
+                        </>
+                      )}
+                    </span>
+                  </div>
+                  <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600 dark:text-slate-300">
+                    <span>영역: {bilingual ? cat?.titleKo : cat?.titleEn}</span>
+                    <span>내 선택: {userText}</span>
+                    <span className="font-semibold text-emerald-700 dark:text-emerald-300">
+                      정답: {q.options[q.correctIndex]}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-xs text-slate-700 dark:text-slate-200">
+                    {bilingual ? q.explanationKo : q.explanationEn}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
         </section>
       </div>
     );
@@ -171,7 +242,7 @@ export function DiagnosticPage() {
             setStepIndex(0);
             setStarted(true);
           }}
-          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-900 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-800 dark:bg-blue-600"
+          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-900 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500"
         >
           <span>16문항 진단 시작하기</span>
           <ArrowRight className="h-4 w-4" />
@@ -188,7 +259,7 @@ export function DiagnosticPage() {
       <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400">
         <span>
           문항 {stepIndex + 1} / {DIAGNOSTIC_QUESTIONS.length} ·{' '}
-          {settings.languageMode === 'bilingual' ? cat?.titleKo : cat?.titleEn}
+          {bilingual ? cat?.titleKo : cat?.titleEn}
         </span>
         <span>{progressPct}%</span>
       </div>
@@ -209,7 +280,7 @@ export function DiagnosticPage() {
             key={opt}
             type="button"
             onClick={() => handleAnswer(idx)}
-            className="flex items-center gap-3 rounded-xl border border-stone-200 bg-white px-4 py-3 text-left text-sm font-medium text-slate-800 transition hover:border-blue-500 hover:bg-blue-50/50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-blue-400"
+            className="flex items-center gap-3 rounded-xl border border-stone-200 bg-white px-4 py-3 text-left text-sm font-medium text-slate-800 transition hover:border-blue-500 hover:bg-blue-50/50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-blue-400 dark:hover:bg-slate-800"
           >
             <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-stone-300 text-xs font-bold dark:border-slate-600">
               {String.fromCharCode(65 + idx)}
@@ -221,10 +292,32 @@ export function DiagnosticPage() {
         <button
           type="button"
           onClick={() => handleAnswer('unsure')}
-          className="mt-1 inline-flex items-center justify-center gap-2 rounded-xl border border-dashed border-amber-400 bg-amber-50/70 px-4 py-2.5 text-sm font-semibold text-amber-900 hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-200"
+          className="mt-1 inline-flex items-center justify-center gap-2 rounded-xl border border-dashed border-amber-400 bg-amber-50/70 px-4 py-2.5 text-sm font-semibold text-amber-900 hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-200 dark:hover:bg-amber-950/50"
         >
           <HelpCircle className="h-4 w-4" />
           잘 모르겠어요 (추천 단원에 추가)
+        </button>
+      </div>
+
+      <div className="flex items-center justify-between border-t border-stone-200 pt-3 dark:border-slate-800">
+        <button
+          type="button"
+          disabled={stepIndex === 0}
+          onClick={() => setStepIndex((i) => Math.max(0, i - 1))}
+          className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-stone-100 disabled:opacity-40 dark:text-slate-300 dark:hover:bg-slate-800"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          이전 문항
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setStarted(false);
+            setStepIndex(0);
+          }}
+          className="rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-500 hover:bg-stone-100 dark:text-slate-400 dark:hover:bg-slate-800"
+        >
+          진단 취소
         </button>
       </div>
     </div>

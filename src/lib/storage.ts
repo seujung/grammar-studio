@@ -28,23 +28,74 @@ function getStorage(): Storage | null {
   }
 }
 
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
 function isValidProgress(value: unknown): value is UserProgress {
-  if (!value || typeof value !== 'object') return false;
+  if (!isPlainObject(value)) return false;
   const v = value as Partial<UserProgress>;
-  return (
-    v.version === 1 &&
-    typeof v.unitProgress === 'object' &&
-    v.unitProgress !== null &&
-    typeof v.srsCards === 'object' &&
-    v.srsCards !== null &&
-    Array.isArray(v.studyDates) &&
-    typeof v.dailyCompletedUnits === 'object' &&
-    v.dailyCompletedUnits !== null
-  );
+  if (
+    v.version !== 1 ||
+    !isPlainObject(v.unitProgress) ||
+    !isPlainObject(v.srsCards) ||
+    !Array.isArray(v.studyDates) ||
+    !v.studyDates.every((d) => typeof d === 'string') ||
+    !isPlainObject(v.dailyCompletedUnits)
+  ) {
+    return false;
+  }
+
+  for (const item of Object.values(v.unitProgress)) {
+    if (
+      !isPlainObject(item) ||
+      typeof item.unitId !== 'number' ||
+      !Array.isArray(item.attemptedExerciseIds) ||
+      !Array.isArray(item.correctExerciseIds)
+    ) {
+      return false;
+    }
+  }
+
+  for (const card of Object.values(v.srsCards)) {
+    if (
+      !isPlainObject(card) ||
+      typeof card.exerciseId !== 'string' ||
+      typeof card.unitId !== 'number' ||
+      typeof card.intervalDays !== 'number' ||
+      typeof card.nextReviewAt !== 'string'
+    ) {
+      return false;
+    }
+  }
+
+  for (const units of Object.values(v.dailyCompletedUnits)) {
+    if (!Array.isArray(units) || !units.every((u) => typeof u === 'number')) {
+      return false;
+    }
+  }
+
+  if (v.diagnosticResult !== null && v.diagnosticResult !== undefined) {
+    const diag = v.diagnosticResult as unknown;
+    if (
+      !isPlainObject(diag) ||
+      typeof diag.totalQuestions !== 'number' ||
+      typeof diag.correctCount !== 'number' ||
+      !Array.isArray(diag.weakCategories) ||
+      !Array.isArray(diag.recommendedUnits) ||
+      !isPlainObject(diag.answers)
+    ) {
+      return false;
+    }
+  } else if (v.diagnosticResult === undefined) {
+    return false;
+  }
+
+  return true;
 }
 
 function isValidSettings(value: unknown): value is UserSettings {
-  if (!value || typeof value !== 'object') return false;
+  if (!isPlainObject(value)) return false;
   const s = value as Partial<UserSettings>;
   return (
     (s.languageMode === 'bilingual' || s.languageMode === 'en') &&
